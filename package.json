@@ -1,0 +1,55 @@
+{
+  "name": "sql-detective",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SQL Detective: Archivos del Crimen — videojuego educativo para aprender SQL resolviendo crímenes",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "db:seed": "tsx scripts/seed-cases.ts",
+    "db:setup": "tsx scripts/migrate.ts && tsx scripts/seed-cases.ts",
+    "admin:create": "tsx scripts/create-admin.ts",
+    "db:local": "tsx scripts/local-postgres.ts",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "db:validate": "tsx scripts/validate-cases.ts",
+    "vercel-build": "tsx scripts/vercel-build.ts && next build",
+    "test:all": "vitest run && vitest run --config vitest.e2e.config.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.20.4",
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-sql": "^6.10.0",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
+    "@lezer/highlight": "^1.2.5",
+    "next": "^15.5.29",
+    "pdf-lib": "^1.17.1",
+    "pg": "^8.23.1",
+    "pg-cursor": "^2.22.1",
+    "pgsql-ast-parser": "^12.0.2",
+    "react": "^19.1.10",
+    "react-dom": "^19.1.10",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "@types/pg-cursor": "^2.7.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "embedded-postgres": "^18.6.0-beta.19",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,207 @@
+import type { CaseDef } from './types';
+import { table } from './helpers';
+
+// TUTORIAL JUGABLE — "La taza del comisario"
+// Culpable: Tomás Ibarra (agente 4) se llevó la taza para usarla como portalápices.
+
+const agentes = table(
+  'agentes',
+  'Agentes que trabajan en la Agencia Índice.',
+  [
+    'id_agente:integer:pk|Identificador único del agente',
+    'nombre:text|Nombre completo',
+    'especialidad:text|Área de trabajo',
+    'anios_servicio:integer|Años de servicio en la agencia',
+    'turno:text|Turno de trabajo (mañana, tarde, noche)',
+  ],
+  [
+    [1, 'Rocío Galván', 'Interrogatorios', 22, 'mañana'],
+    [2, 'Bruno Salas', 'Huellas', 6, 'tarde'],
+    [3, 'Inés Varela', 'Archivo', 12, 'tarde'],
+    [4, 'Tomás Ibarra', 'Informática', 3, 'tarde'],
+    [5, 'Lía Montoya', 'Balística', 9, 'tarde'],
+    [6, 'Aurelio Ferrer', 'Comisario', 31, 'mañana'],
+    [7, 'Gael Restrepo', 'Huellas', 15, 'noche'],
+    [8, 'Marta Quiroga', 'Fotografía forense', 8, 'mañana'],
+    [9, 'Ulises Pardo', 'Archivo', 2, 'noche'],
+    [10, 'Celia Bermúdez', 'Informática', 11, 'mañana'],
+  ],
+);
+
+const cocina = table(
+  'registro_cocina',
+  'Registro de la tarjeta de acceso a la cocina de la agencia (hoy).',
+  [
+    'id_registro:integer:pk|Identificador del registro',
+    'id_agente:integer:fk=agentes.id_agente|Agente que entró a la cocina',
+    'hora_entrada:time|Hora de entrada',
+    'accion:text|Lo que el agente anotó en la bitácora de la cocina',
+  ],
+  [
+    [1, 6, '08:05', 'preparó café en la taza del comisario'],
+    [2, 8, '09:40', 'calentó el almuerzo'],
+    [3, 1, '11:15', 'lavó vasos'],
+    [4, 6, '13:00', 'dejó la taza del comisario junto al lavaplatos'],
+    [5, 3, '13:20', 'tomó agua'],
+    [6, 2, '14:10', 'preparó té'],
+    [7, 5, '14:35', 'guardó galletas en la alacena'],
+    [8, 4, '14:52', 'se llevó la taza del comisario al escritorio'],
+    [9, 3, '15:05', 'buscó azúcar'],
+    [10, 10, '16:30', 'preparó café'],
+  ],
+);
+
+export const case00: CaseDef = {
+  id: 0,
+  code: 'EXP-00',
+  title: 'La taza del comisario',
+  level: 0,
+  tagline: 'Entrenamiento de cadetes: aprende a interrogar a la base de datos.',
+  location: 'Agencia Índice, cocina del tercer piso',
+  date: 'Hoy, 15:10',
+  scene: 'tutorial',
+  briefing: [
+    'Bienvenida, cadete. Antes de entregarte un expediente real, la Inspectora Galván quiere comprobar que sabes usar la terminal de la agencia.',
+    'Una base de datos es un archivo organizado de información. Se divide en TABLAS; cada tabla guarda un tipo de registro (agentes, accesos, llamadas…). Cada tabla tiene COLUMNAS (los datos que se anotan) y FILAS (cada registro concreto).',
+    'El caso de práctica: la taza favorita del Comisario Ferrer desapareció de la cocina. No es grave… pero el comisario no trabaja sin su café.',
+  ],
+  timeline: [
+    { time: '13:00', event: 'El comisario deja su taza junto al lavaplatos.' },
+    { time: '15:10', event: 'El comisario descubre que la taza ya no está.' },
+  ],
+  concepts: ['Tablas y columnas', 'SELECT', 'WHERE', 'Comparaciones', 'ORDER BY', 'LIKE'],
+  tables: [agentes, cocina],
+  characters: [
+    {
+      id: 'galvan',
+      name: 'Rocío Galván',
+      role: 'Inspectora instructora',
+      age: 51,
+      bio: '22 años en la agencia. Dice que una consulta bien escrita vale más que mil corazonadas.',
+      statement: 'Cadete: aquí no adivinamos. Cada conclusión debe salir de una consulta. Empieza por conocer las tablas.',
+      suspect: false,
+      look: { skin: 2, hair: 'coleta', hairColor: 6, accessory: 'gafas', outfitStyle: 'traje', outfit: 1, age: 'mayor' },
+      questions: [
+        { id: 'q1', text: '¿Qué es una tabla?', answer: 'Una tabla es como una hoja de registro: cada columna es un tipo de dato (nombre, hora…) y cada fila es un registro concreto. Abre el explorador de esquemas para verlas.' },
+        { id: 'q2', text: '¿Cómo leo los resultados?', answer: 'Cada fila del resultado es un registro que cumplió tus condiciones. Si una consulta devuelve 0 filas también es información: significa que nada cumple esa condición.' },
+      ],
+    },
+    {
+      id: 'ferrer',
+      name: 'Aurelio Ferrer',
+      role: 'Comisario',
+      age: 63,
+      bio: 'Jefe de la agencia. Bebe seis cafés al día, siempre en la misma taza desportillada.',
+      statement: 'La dejé junto al lavaplatos a la una. ¡A la una! Y ahora no está.',
+      suspect: false,
+      look: { skin: 1, hair: 'canoso', hairColor: 7, facial: 'bigote', outfitStyle: 'uniforme', outfit: 2, age: 'mayor' },
+      questions: [
+        { id: 'q1', text: '¿Cómo es la taza?', answer: 'Blanca, con una lupa dibujada. Me la regalaron cuando resolví mi primer caso.' },
+      ],
+    },
+    {
+      id: 'bruno',
+      name: 'Bruno Salas',
+      role: 'Agente de huellas',
+      age: 30,
+      bio: 'Meticuloso. Toma té, nunca café.',
+      statement: 'Entré a preparar un té antes de las dos y media. No vi ninguna taza especial.',
+      suspect: true,
+      look: { skin: 3, hair: 'corto', hairColor: 1, outfitStyle: 'camisa', outfit: 3 },
+      questions: [
+        { id: 'q1', text: '¿A qué hora entró a la cocina?', answer: 'A las 14:10, para el té. Puedes comprobarlo en el registro de la cocina.' },
+      ],
+    },
+    {
+      id: 'ines',
+      name: 'Inés Varela',
+      role: 'Archivista',
+      age: 41,
+      bio: 'Conoce cada carpeta del archivo. También conoce cada chisme de la agencia.',
+      statement: 'Fui dos veces: a tomar agua y a buscar azúcar. Cuando volví a las tres, la taza ya no estaba junto al lavaplatos.',
+      suspect: true,
+      look: { skin: 0, hair: 'largo', hairColor: 3, accessory: 'aretes', outfitStyle: 'sueter', outfit: 5 },
+      questions: [
+        { id: 'q1', text: '¿Vio a alguien con la taza?', answer: 'No, pero alguien de Informática pasó con algo blanco en la mano poco antes de las tres.', note: 'Inés vio a alguien de Informática con algo blanco poco antes de las 15:00.' },
+      ],
+    },
+    {
+      id: 'tomas',
+      name: 'Tomás Ibarra',
+      role: 'Agente de informática',
+      age: 26,
+      bio: 'Recién llegado. Siempre tiene el escritorio lleno de cables y lápices.',
+      statement: 'Yo solo pasé por la cocina un momento. No tengo nada que ver con tazas.',
+      suspect: true,
+      look: { skin: 4, hair: 'flequillo', hairColor: 0, accessory: 'auriculares', outfitStyle: 'chaqueta', outfit: 6, age: 'joven' },
+      questions: [
+        { id: 'q1', text: '¿Qué hizo en la cocina?', answer: 'Eh… nada importante. Tomé algo que estaba abandonado.' },
+        {
+          id: 'q2',
+          text: 'La bitácora dice que usted se llevó la taza del comisario a las 14:52. ¿Por qué?',
+          answer: 'Está bien… necesitaba algo para guardar lápices y parecía abandonada. ¡Pensaba devolverla!',
+          requires: ['T7', 'T8'],
+          contradiction: true,
+          note: 'Tomás admite haber tomado la taza a las 14:52.',
+        },
+      ],
+    },
+  ],
+  evidence: [
+    { id: 'T1', title: 'Primera consulta', description: 'Consultaste toda la tabla agentes con SELECT *.', key: true, reference: 'SELECT * FROM agentes;', match: { all: [['Galván'], ['Bermúdez'], ['Ibarra']], minRows: 10, maxRows: 10 } },
+    { id: 'T2', title: 'Columnas elegidas', description: 'Seleccionaste solo las columnas que necesitabas.', key: true, reference: 'SELECT nombre, especialidad FROM agentes;', match: { all: [['Huellas'], ['Balística']], minRows: 10, maxRows: 10, maxColumns: 2 } },
+    { id: 'T3', title: 'Turno de la tarde', description: 'Bruno Salas, Inés Varela, Tomás Ibarra y Lía Montoya trabajan en la tarde: estaban en la agencia cuando desapareció la taza.', key: true, reference: "SELECT nombre FROM agentes WHERE turno = 'tarde';", match: { all: [['Salas'], ['Varela'], ['Ibarra'], ['Montoya']], maxRows: 4, features: ['where'] } },
+    { id: 'T4', title: 'Veteranos', description: 'Filtraste agentes con más de 10 años de servicio usando una comparación numérica.', key: true, reference: 'SELECT nombre, anios_servicio FROM agentes WHERE anios_servicio > 10;', match: { all: [['Galván'], ['Varela'], ['Ferrer'], ['Restrepo'], ['Bermúdez']], maxRows: 5 } },
+    { id: 'T5', title: 'La cocina después de las 14:30', description: 'Después de las 14:30 entraron a la cocina los agentes 5, 4, 3 y 10.', key: true, reference: "SELECT * FROM registro_cocina WHERE hora_entrada > '14:30';", match: { all: [['14:35'], ['14:52'], ['15:05'], ['16:30']], maxRows: 4 } },
+    { id: 'T6', title: 'Orden cronológico', description: 'Ordenaste los registros de la cocina por hora con ORDER BY.', key: true, reference: 'SELECT * FROM registro_cocina ORDER BY hora_entrada;', match: { any: [['16:30']], minRows: 4, maxRows: 10, features: ['order_by'] } },
+    { id: 'T7', title: 'Rastro de la taza', description: 'Con LIKE encontraste todos los registros que mencionan la taza: el último es del agente 4 a las 14:52.', key: true, reference: "SELECT * FROM registro_cocina WHERE accion LIKE '%taza%';", match: { all: [['08:05'], ['13:00'], ['14:52']], maxRows: 3, features: ['like'] } },
+    { id: 'T8', title: '¿Quién es el agente 4?', description: 'El agente 4 es Tomás Ibarra, de Informática.', key: true, reference: 'SELECT * FROM agentes WHERE id_agente = 4;', match: { any: [['Ibarra', 'Informática']], maxRows: 1 } },
+  ],
+  objectives: [
+    { id: 'O1', title: 'Conocer la tabla de agentes', description: 'Aprende a leer una tabla completa y a elegir columnas.', evidence: ['T1', 'T2'], tables: ['agentes'] },
+    { id: 'O2', title: 'Filtrar con WHERE', description: 'Usa condiciones para quedarte solo con las filas que importan.', evidence: ['T3', 'T4'], tables: ['agentes'] },
+    { id: 'O3', title: 'Reconstruir la tarde en la cocina', description: 'Investiga quién entró a la cocina y qué hizo.', evidence: ['T5', 'T6', 'T7', 'T8'], tables: ['registro_cocina', 'agentes'] },
+  ],
+  hints: [
+    { id: 'H1', title: 'Mirar todo', evidence: 'T1', levels: ['Antes de buscar, observa. ¿Qué agentes existen?', 'La tabla se llama agentes.', 'SELECT * FROM agentes; muestra todas las columnas (*) de todas las filas.'] },
+    { id: 'H2', title: 'Solo lo necesario', evidence: 'T2', levels: ['No siempre necesitas todas las columnas.', 'Pide solo nombre y especialidad de la tabla agentes.', 'Escribe las columnas separadas por comas: SELECT columna1, columna2 FROM tabla;'] },
+    { id: 'H3', title: '¿Quién estaba de turno?', evidence: 'T3', levels: ['La taza desapareció por la tarde.', 'La columna turno de agentes indica cuándo trabaja cada uno.', "WHERE filtra filas. Los textos van entre comillas simples: WHERE columna = 'valor'"] },
+    { id: 'H4', title: 'Comparar números', evidence: 'T4', levels: ['La inspectora quiere saber quiénes son los veteranos (más de 10 años).', 'Usa la columna anios_servicio.', 'Los números no llevan comillas: WHERE columna > 10'] },
+    { id: 'H5', title: 'La hora clave', evidence: 'T5', levels: ['La taza estaba allí a las 13:00 y desapareció antes de las 15:10.', 'Revisa registro_cocina y su columna hora_entrada.', "Las horas se comparan como texto entre comillas: WHERE hora_entrada > '14:30'"] },
+    { id: 'H6', title: 'Poner orden', evidence: 'T6', levels: ['Una línea de tiempo se entiende mejor en orden.', 'Ordena registro_cocina por hora_entrada.', 'ORDER BY columna (ASC ascendente, DESC descendente) va al final de la consulta.'] },
+    { id: 'H7', title: 'Buscar palabras', evidence: 'T7', levels: ['La bitácora describe lo que hizo cada agente.', 'Busca en la columna accion los registros que mencionan «taza».', "LIKE busca patrones: '%taza%' significa «contiene taza» en cualquier posición."] },
+    { id: 'H8', title: 'Ponerle nombre a un número', evidence: 'T8', requires: { evidence: ['T7'] }, levels: ['registro_cocina solo guarda el id del agente.', 'Busca en agentes el registro con ese id_agente.', 'WHERE id_agente = 4'] },
+  ],
+  accusation: { minKeyEvidence: 8, minObjectives: 3, minQueries: 6, penalty: 2, minSupportingEvidence: 2 },
+  solution: {
+    culprit: 'tomas',
+    motive: 'Necesitaba un portalápices para su escritorio y creyó que la taza estaba abandonada.',
+    opportunity: 'Entró a la cocina a las 14:52, cuando la taza seguía junto al lavaplatos.',
+    method: 'Tomó la taza y la llevó a su escritorio.',
+    justification: 'La bitácora registra que el agente 4 se llevó la taza a las 14:52; el agente 4 es Tomás Ibarra.',
+    eliminations: {
+      bruno: { evidence: ['T5', 'T7'], explanation: 'Bruno entró a las 14:10 a preparar té; ningún registro suyo menciona la taza.' },
+      ines: { evidence: ['T5', 'T7'], explanation: 'Inés entró a las 15:05, cuando la taza ya se la había llevado el agente 4.' },
+    },
+    incriminating: ['T7', 'T8'],
+    reveal: [
+      'Tomás Ibarra devolvió la taza… llena de lápices de colores.',
+      'El comisario no presentó cargos, pero le regaló a Tomás un portalápices de verdad.',
+      'Entrenamiento superado: ya sabes consultar, filtrar, ordenar y buscar texto. Los expedientes reales te esperan.',
+    ],
+  },
+  references: [
+    { title: 'Todas las entradas de la cocina', sql: 'SELECT * FROM registro_cocina;' },
+    { title: 'Agentes de informática', sql: "SELECT * FROM agentes WHERE especialidad = 'Informática';" },
+  ],
+  tutorial: [
+    { id: 'S1', title: 'Tu primera consulta', evidence: 'T1', lesson: ['SELECT indica qué columnas quieres ver. FROM indica de qué tabla.', 'El asterisco * significa «todas las columnas».'], task: 'Muestra todos los agentes de la agencia.', example: 'SELECT * FROM nombre_de_tabla;' },
+    { id: 'S2', title: 'Elegir columnas', evidence: 'T2', lesson: ['En lugar de *, puedes escribir los nombres de las columnas separados por comas.', 'Así el resultado muestra solo lo que te interesa.'], task: 'Muestra solo el nombre y la especialidad de cada agente.', example: 'SELECT columna1, columna2 FROM tabla;' },
+    { id: 'S3', title: 'Filtrar filas con WHERE', evidence: 'T3', lesson: ['WHERE deja solo las filas que cumplen una condición.', "Los textos se escriben entre comillas simples: 'tarde'."], task: 'Encuentra a los agentes del turno de la tarde.', example: "SELECT nombre FROM tabla WHERE columna = 'valor';" },
+    { id: 'S4', title: 'Comparar números', evidence: 'T4', lesson: ['Los operadores > < >= <= = <> comparan valores.', 'Los números se escriben sin comillas.'], task: 'Encuentra a los agentes con más de 10 años de servicio.', example: 'SELECT nombre FROM tabla WHERE columna > 10;' },
+    { id: 'S5', title: 'Investigar otra tabla', evidence: 'T5', lesson: ['Una base de datos tiene varias tablas. registro_cocina anota cada entrada a la cocina.', "Las horas se comparan como texto: '14:30'."], task: '¿Quién entró a la cocina después de las 14:30?', example: "SELECT * FROM tabla WHERE hora > '14:30';" },
+    { id: 'S6', title: 'Ordenar resultados', evidence: 'T6', lesson: ['ORDER BY ordena el resultado. ASC = ascendente (por defecto), DESC = descendente.'], task: 'Muestra los registros de la cocina en orden de hora.', example: 'SELECT * FROM tabla ORDER BY columna;' },
+    { id: 'S7', title: 'Buscar texto con LIKE', evidence: 'T7', lesson: ["LIKE compara con un patrón. % representa cualquier cantidad de caracteres: '%taza%' = contiene «taza»."], task: 'Encuentra todos los registros de la cocina que mencionan la taza.', example: "SELECT * FROM tabla WHERE columna LIKE '%palabra%';" },
+    { id: 'S8', title: 'Conectar pistas', evidence: 'T8', lesson: ['Las tablas se relacionan mediante identificadores: id_agente de registro_cocina apunta a id_agente de agentes.', 'Interpretar resultados es parte del trabajo: ¿qué agente aparece en el último registro de la taza?'], task: 'Descubre quién es el agente que aparece en el último registro de la taza.', example: 'SELECT * FROM agentes WHERE id_agente = ?;' },
+  ],
+};
