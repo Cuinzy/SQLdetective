@@ -32,6 +32,10 @@
   --string: #b4362e;
   --teal: #3f6f73;
   --shadow: 3px 3px 0 0 #0a0d11;
+  --f-pixel: 'Pixelify Sans';
+  --f-courier: 'Courier Prime';
+  --f-vt: 'VT323';
+  --f-elite: 'Special Elite';
   --font-title: var(--f-pixel), 'Courier New', monospace;
   --font-type: var(--f-courier), 'Courier New', monospace;
   --font-stamp: var(--f-elite), 'Courier New', monospace;
