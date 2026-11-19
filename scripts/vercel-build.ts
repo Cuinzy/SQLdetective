@@ -9,6 +9,10 @@ import { closePools } from '../src/server/db';
 
 async function main() {
   if (!process.env.DATABASE_URL) {
+    if (process.env.VERCEL) {
+      console.error('[vercel-build] DATABASE_URL no está definida en Vercel (Settings → Environment Variables, entorno Production). Sin ella el juego no funciona.');
+      process.exit(1);
+    }
     console.warn('[vercel-build] DATABASE_URL no está definida: se omite la preparación de la base de datos.');
     return;
   }

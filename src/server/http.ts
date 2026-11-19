@@ -20,9 +20,17 @@ export function handle<C>(fn: Handler<C>): Handler<C> {
     } catch (e) {
       if (e instanceof GameError) return json({ error: e.message }, e.status);
       const msg = (e as Error)?.message ?? String(e);
-      if (/DATABASE_URL|ECONNREFUSED|getaddrinfo|password authentication/i.test(msg)) {
+      if (/DATABASE_URL|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|getaddrinfo|password authentication|timeout expired|SSL|self.signed/i.test(msg)) {
         console.error('[api] base de datos no disponible:', msg);
         return json({ error: 'La base de datos de la agencia no está disponible. Avisa al docente.' }, 503);
+      }
+      if (/(relation|schema) "game(\.|")/i.test(msg)) {
+        console.error('[api] base de datos sin preparar (faltan migraciones):', msg);
+        return json({ error: 'La base de datos existe pero aún no está preparada (faltan las migraciones). Avisa al docente.' }, 503);
+      }
+      if (/(SESSION_SECRET|REPORT_SIGNING_SECRET) debe definirse/.test(msg)) {
+        console.error('[api] configuración incompleta:', msg);
+        return json({ error: 'El servidor no está bien configurado (secretos). Avisa al docente.' }, 503);
       }
       console.error('[api] error inesperado', e);
       return json({ error: 'Error inesperado en el servidor.' }, 500);

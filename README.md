@@ -156,7 +156,7 @@ npm run build; npm run start
    - crea o actualiza el docente si `ADMIN_USERNAME`/`ADMIN_PASSWORD` están definidos;
    - compila Next.js.
 4. Elimina `ADMIN_PASSWORD` de las variables tras el primer despliegue.
-5. Comprueba `https://TU-APP.vercel.app/api/health` → `{"ok":true,"caseSchemas":16,"migrations":1}`.
+5. Comprueba `https://TU-APP.vercel.app/api/health` → `"ok":true` con `database.caseSchemas: 16`, `database.migrations: 1` y `sandbox.ok: true`. Si algo falla, la respuesta indica qué variable o conexión revisar (nunca muestra valores).
 
 Todo el estado oficial vive en PostgreSQL: la app no usa archivos temporales ni memoria del servidor para registrar investigaciones, por lo que funciona con las funciones serverless de Vercel.
 
@@ -199,7 +199,7 @@ Las pruebas levantan su propio PostgreSQL temporal (puerto 54339), migran y carg
 
 ## Resultados de las pruebas
 
-Ejecutadas el 18-nov-2026 (Windows 11, Node 24, PostgreSQL 18 embebido): `npm run test` → **5 archivos, 106 pruebas, 106 aprobadas**.
+Ejecutadas el 18-nov-2026 (Windows 11, Node 24, PostgreSQL 18 embebido): `npm run test` → **5 archivos, 106 pruebas, 106 aprobadas**; `npm run test:e2e` → **10 aprobadas**. Total: **116/116**.
 
 | Prueba solicitada | Dónde | Estado |
 |---|---|---|
@@ -214,4 +214,4 @@ Ejecutadas el 18-nov-2026 (Windows 11, Node 24, PostgreSQL 18 embebido): `npm ru
 | 9 · Integridad de contadores y estado | `game.test.ts` | ✅ |
 | 10 · Los 15 casos validados contra PostgreSQL real | `sandbox.test.ts`, `tests/unit/content.test.ts` | ✅ |
 | Seguridad del motor (multi-sentencia, solo lectura, esquemas ajenos, timeout, rol aislado) | `sandbox.test.ts`, `analyzer.test.ts` | ✅ |
-| Extremo a extremo HTTP (`next start`) | `tests/e2e/http-flow.test.ts` | ⚠️ escrita, **aún no ejecutada** (`npm run build; npm run test:e2e`) |
+| Extremo a extremo HTTP (`next start` + PostgreSQL real): registro, cookie httpOnly, CSRF, SQL destructivo, bloqueo <20, investigación completa, acusación fallida y penalización, PDF/JSON/CSV, aislamiento entre estudiantes, panel docente con login, verificación de reporte, recuperación de credencial | `tests/e2e/http-flow.test.ts` | ✅ 10/10 |
