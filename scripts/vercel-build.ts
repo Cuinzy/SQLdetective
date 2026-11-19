@@ -2,7 +2,7 @@
 // Se ejecuta con "npm run vercel-build" (Vercel lo detecta automáticamente).
 import './env';
 import pg from 'pg';
-import { migrate, seedAll } from '../src/server/seed';
+import { migrate, seedAll, setupSandboxRole } from '../src/server/seed';
 import { ALL_CASES } from '../src/cases';
 import { createAdmin } from '../src/server/admin';
 import { closePools } from '../src/server/db';
@@ -25,11 +25,26 @@ async function main() {
   if (force || Number(present.rows[0].n) < ALL_CASES.length) {
     console.log('[vercel-build] cargando los casos…');
     await seedAll(client, ALL_CASES, process.env.SANDBOX_DB_PASSWORD);
-  } else console.log('[vercel-build] casos ya cargados (usa SEED_ON_BUILD=true para recargarlos).');
+  } else {
+    console.log('[vercel-build] casos ya cargados (usa SEED_ON_BUILD=true para recargarlos).');
+    // Sincroniza siempre la contraseña del rol aislado con SANDBOX_DB_PASSWORD (idempotente).
+    await setupSandboxRole(client, ALL_CASES, process.env.SANDBOX_DB_PASSWORD);
+    if (process.env.SANDBOX_DB_PASSWORD) console.log('[vercel-build] rol aislado sincronizado con SANDBOX_DB_PASSWORD.');
+  }
   await client.end();
-  if (process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD) {
-    await createAdmin(process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD);
-    console.log(`[vercel-build] docente «${process.env.ADMIN_USERNAME}» creado/actualizado. Elimina ADMIN_PASSWORD de las variables de entorno.`);
+  const user = (process.env.ADMIN_USERNAME ?? '').trim();
+  const pass = (process.env.ADMIN_PASSWORD ?? '').trim();
+  if (user || pass) {
+    // Un error aquí no debe impedir el despliegue del juego: solo se avisa (sin mostrar valores).
+    try {
+      await createAdmin(user, pass);
+      console.log(`[vercel-build] docente «${user}» creado/actualizado. Elimina ADMIN_PASSWORD de las variables de entorno.`);
+    } catch (e) {
+      console.warn(
+        `[vercel-build] AVISO: no se creó el docente (${(e as Error).message}). ` +
+          `Vercel entregó ADMIN_USERNAME con ${user.length} caracteres y ADMIN_PASSWORD con ${pass.length} caracteres. El juego se despliega igual.`,
+      );
+    }
   }
   await closePools();
 }
